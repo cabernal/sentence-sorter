@@ -3,7 +3,38 @@
 #include <errno.h>
 #include <string.h>
 
-const int BUFF_SIZE = 4096;
+const unsigned int BUFF_SIZE = 4096;
+
+typedef struct sentences{
+    unsigned int size;
+    unsigned int num_elements;
+    char **contents;
+} sentences_t;
+
+//initialize_sentences_struct(sentence_list);
+//insert_sentence(sentence_list, get_next_sentence(fp));
+//populate_sentences_struct(sentences_list, fp);
+//sort_sentences(sentene_list);
+//print_sentences(sentence_list);
+
+void initialize_sentences_struct(sentences_t *sentences){
+    sentences->size = BUFF_SIZE;
+    sentences->num_elements = 0;
+    sentences->contents = (char **)malloc(BUFF_SIZE * sizeof(char *));
+}
+
+void insert_sentence(sentences_t *sentences, char* sentence){
+    // reallocate if we have exceeded the buffer size
+    if(sentences->size == BUFF_SIZE){
+        unsigned int new_buff_size = sentences->size + BUFF_SIZE;
+        sentences->contents = (char **)realloc(sentences->contents, new_buff_size);
+        sentences->size = new_buff_size;;
+    }
+    // insert sentence and update number of elements
+    unsigned int insert_index = sentences->num_elements;
+    sentences->contents[insert_index] = sentence;
+    sentences->num_elements++;
+}
 
 char* get_next_sentence(FILE *fp){
     //allocate sentence buffer
@@ -11,24 +42,36 @@ char* get_next_sentence(FILE *fp){
     int i, c;
 
     for(i = 0; ((c = fgetc(fp)) != EOF); i++){
-
         //reallocate to accomodate for null character and remaining of sentence
         if (i == BUFF_SIZE - 1){
             //TODO: reallocate buffer (increase size)
         }
-
         //if at end of sentence, return sentence
         if (c == '.'){
             sentence_buff[i] = c;
             return sentence_buff;
         }
-
         sentence_buff[i] = c;
     }
-
+    sentence_buff[i + 1] = '\0'; 
+    //TODO: clean up excess memory
     return sentence_buff;
     
 }
+
+void populate_sentences_struct(sentences_t *sentences, FILE *fp){
+    while(!feof(fp)){
+        insert_sentence(sentences, get_next_sentence(fp));
+    }
+}
+
+void print_sentences(sentences_t* sentences){
+    int i;
+    for(i = 0; i < sentences->num_elements; i++){
+        printf("%s\n", sentences->contents[i]);
+    }
+}
+
 
 int main(int argc, char *argv[]){
     char *usage_msg = "usage: sort_sentences <input-file>";
@@ -41,13 +84,9 @@ int main(int argc, char *argv[]){
     }
 
     char *filename = argv[1];
-    char* current_sentence;
     FILE *fp;
 
     if ((fp = fopen(filename, "r"))){
-        while(!feof(fp)){
-            printf("%s\n", get_next_sentence(fp));
-        }
     }
     else{
         printf(error_msg, strerror(errno));
@@ -55,5 +94,7 @@ int main(int argc, char *argv[]){
     }
 
     // TODO: check for error
+    //      free memory
     fclose(fp);
+    return 0;
 }
