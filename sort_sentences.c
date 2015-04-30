@@ -23,46 +23,11 @@ char* get_next_sentence(FILE *fp){
             return sentence_buff;
         }
 
-        //replace newline/tab characters with whitespace
-        if( c == '\n' || c == '\t'){
-            sentence_buff[i] = ' ';
-            continue;
-        }
         sentence_buff[i] = c;
     }
 
     return sentence_buff;
     
-}
-
-char* get_next_sentence_old(FILE *fp){
-    //assuming fiile pointer is open
-    char target_char = '.';
-    int next_sentence_len = 0;
-    int c;
-    // search for period
-    while ((c = fgetc(fp)) != EOF){
-        if ( c == '.'){
-           next_sentence_len++;
-           break; 
-        }
-        next_sentence_len++;
-    }
-
-    if ( c == EOF && next_sentence_len == 0){
-        return NULL;
-    }
-
-    // TODO: Check if we need to rewind the pointer
-    fseek(fp, -next_sentence_len, SEEK_CUR);
-
-    // load sentence to memory
-    char *sentence_buff = (char *)malloc((next_sentence_len + 1) * sizeof(char));
-    fread(sentence_buff, next_sentence_len, 1, fp);
-    sentence_buff[next_sentence_len] = '\0';
-
-    // TODO: Remove tab/newline characters from sentence
-    return sentence_buff;
 }
 
 int main(int argc, char *argv[]){
