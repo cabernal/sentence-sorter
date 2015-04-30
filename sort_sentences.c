@@ -25,10 +25,12 @@ void initialize_sentences_struct(sentences_t *sentences){
 
 void insert_sentence(sentences_t *sentences, char* sentence){
     // reallocate if we have exceeded the buffer size
-    if(sentences->size == BUFF_SIZE){
+    if(sentences->num_elements== BUFF_SIZE){
+        printf("Triggered reallocation...\n");
         unsigned int new_buff_size = sentences->size + BUFF_SIZE;
         sentences->contents = (char **)realloc(sentences->contents, new_buff_size);
         sentences->size = new_buff_size;;
+        printf("Done reallocation...\n");
     }
     // insert sentence and update number of elements
     unsigned int insert_index = sentences->num_elements;
@@ -72,6 +74,14 @@ void print_sentences(sentences_t* sentences){
     }
 }
 
+void sort_sentences(sentences_t sentences){
+}
+
+//initialize_sentences_struct(sentence_list);
+//insert_sentence(sentence_list, get_next_sentence(fp));
+//populate_sentences_struct(sentences_list, fp);
+//sort_sentences(sentene_list);
+//print_sentences(sentence_list);
 
 int main(int argc, char *argv[]){
     char *usage_msg = "usage: sort_sentences <input-file>";
@@ -87,6 +97,15 @@ int main(int argc, char *argv[]){
     FILE *fp;
 
     if ((fp = fopen(filename, "r"))){
+        sentences_t sentences;
+        initialize_sentences_struct(&sentences);
+        insert_sentence(&sentences, "sentence 1");
+        insert_sentence(&sentences, "sentence 2");
+        insert_sentence(&sentences, "sentence 3");
+        insert_sentence(&sentences, "sentence 4");
+        printf("Size: %i\n", sentences.size);
+        printf("Numelems: %i\n", sentences.num_elements);
+        print_sentences(&sentences);
     }
     else{
         printf(error_msg, strerror(errno));
