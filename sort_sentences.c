@@ -26,11 +26,9 @@ void initialize_sentences_struct(sentences_t *sentences){
 void insert_sentence(sentences_t *sentences, char* sentence){
     // reallocate if we have exceeded the buffer size
     if(sentences->num_elements== BUFF_SIZE){
-        printf("Triggered reallocation...\n");
         unsigned int new_buff_size = sentences->size + BUFF_SIZE;
         sentences->contents = (char **)realloc(sentences->contents, new_buff_size);
         sentences->size = new_buff_size;;
-        printf("Done reallocation...\n");
     }
     // insert sentence and update number of elements
     unsigned int insert_index = sentences->num_elements;
@@ -41,12 +39,16 @@ void insert_sentence(sentences_t *sentences, char* sentence){
 char* get_next_sentence(FILE *fp){
     //allocate sentence buffer
     char* sentence_buff = (char *)malloc(BUFF_SIZE * sizeof(char));
-    int i, c;
+    //memset(sentence_buff, '\0', sizeof(BUFF_SIZE * sizeof(char)));
+    unsigned int i, c, buff_size;
+    buff_size = BUFF_SIZE;
 
     for(i = 0; ((c = fgetc(fp)) != EOF); i++){
         //reallocate to accomodate for null character and remaining of sentence
-        if (i == BUFF_SIZE - 1){
-            //TODO: reallocate buffer (increase size)
+        if (i == (buff_size - 1)){
+            buff_size += buff_size;
+            //check for out-of-mem error
+            sentence_buff = (char *)realloc(sentence_buff, buff_size);;
         }
         //if at end of sentence, return sentence
         if (c == '.'){
@@ -56,7 +58,6 @@ char* get_next_sentence(FILE *fp){
         sentence_buff[i] = c;
     }
     sentence_buff[i + 1] = '\0'; 
-    //TODO: clean up excess memory
     return sentence_buff;
     
 }
@@ -74,8 +75,24 @@ void print_sentences(sentences_t* sentences){
     }
 }
 
-void sort_sentences(sentences_t sentences){
+int sentence_cmp(const void *s1, const void *s2){
+    const char *sentence1 = *(const char**)s1;
+    const char *sentence2 = *(const char**)s2;;
+    return strcmp(sentence1, sentence2);
 }
+
+void sort_sentences(sentences_t *sentences){
+    qsort(sentences->contents, sentences->num_elements, sizeof(char *), sentence_cmp);
+}
+
+void deallocate_sentences(sentences_t *sentences){
+    int i;
+    for(i = 0; i < sentences->num_elements; i++){
+        free(sentences->contents[i]);
+    }
+    free(sentences->contents);
+}
+
 
 //initialize_sentences_struct(sentence_list);
 //insert_sentence(sentence_list, get_next_sentence(fp));
@@ -97,15 +114,27 @@ int main(int argc, char *argv[]){
     FILE *fp;
 
     if ((fp = fopen(filename, "r"))){
+        /*
         sentences_t sentences;
         initialize_sentences_struct(&sentences);
-        insert_sentence(&sentences, "sentence 1");
-        insert_sentence(&sentences, "sentence 2");
-        insert_sentence(&sentences, "sentence 3");
-        insert_sentence(&sentences, "sentence 4");
+        insert_sentence(&sentences, "f sentence");
+        insert_sentence(&sentences, "a sentence");
+        insert_sentence(&sentences, "z sentence");
+        insert_sentence(&sentences, "q sentence");
         printf("Size: %i\n", sentences.size);
         printf("Numelems: %i\n", sentences.num_elements);
         print_sentences(&sentences);
+        printf("Sorting...\n");
+        sort_sentences(&sentences);
+        printf("Done sorting.\n");
+        print_sentences(&sentences);
+        */
+        sentences_t sentences;
+        initialize_sentences_struct(&sentences);
+        populate_sentences_struct(&sentences, fp);
+        sort_sentences(&sentences);
+        print_sentences(&sentences);
+        deallocate_sentences(&sentences);
     }
     else{
         printf(error_msg, strerror(errno));
