@@ -1,0 +1,25 @@
+Synopsis:
+	* This porgram takes an input file and outputs its sentences in sorted order.
+
+Dependecies:
+	* This program was built using GCC 4.9, any 4.X version should work.
+
+Usage:
+	* ./sort_sentences <input-file>
+
+Running Test:
+	* ./simple_test
+
+Compiling:
+	* Sentence sorter: make sort_sentences
+	* Test: make simple_test
+	* All executables: make all
+
+Files Included:
+	* Makefile
+	* sentences_util.c
+	* sentences_util.h
+	* simple_test.c
+	* sort_sentences.c
+
+
